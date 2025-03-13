@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="kMST8M" name="TestSynth" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              companyName="DaniGRM" companyWebsite="www.DaniGRM.com" pluginName="TestSynth"
+              pluginDesc="TestSynth" pluginManufacturer="DaniGRM" pluginManufacturerCode="DGRM"
+              pluginCode="TS">
+  <MAINGROUP id="g35M4c" name="TestSynth">
+    <GROUP id="{FA7968B1-9DEA-0600-6C57-82FD1BB389F9}" name="Source">
+      <FILE id="iQM472" name="GUI.h" compile="0" resource="0" file="Source/GUI.h"/>
+      <FILE id="Cp4etn" name="MySound.h" compile="0" resource="0" file="Source/MySound.h"/>
+      <FILE id="NCC8Ez" name="MyVoice.h" compile="0" resource="0" file="Source/MyVoice.h"/>
+      <FILE id="M3Tdld" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="WuYANX" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="imb4YP" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="q6QRJp" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="TestSynth" headerPath=".\TukyUI"
+                       libraryPath=".\TukyUI"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="TestSynth"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../../../Documents/JUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../../../Documents/JUCE/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
