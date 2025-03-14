@@ -9,6 +9,11 @@
 */
 #include <JuceHeader.h>
 #pragma once
+
+
+const juce::Colour BLUE = juce::Colour::fromRGB(6, 35, 111);
+const juce::Colour ORANGE = juce::Colour::fromRGB(180, 62, 35);
+const juce::Colour WHITE = juce::Colours::whitesmoke;
 class MyLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
@@ -24,11 +29,11 @@ public:
         auto radius = jmin(width, height) * 0.4f;  // Radio del slider
 
         // Dibujar fondo del slider
-        g.setColour(Colours::whitesmoke);
+        g.setColour(WHITE);
         g.fillEllipse(bounds.reduced(width * 0.1f));
 
         // Dibujar borde del slider
-        g.setColour(Colour::fromRGBA(6, 35, 111, 120));
+        g.setColour(BLUE);
         g.drawEllipse(bounds.reduced(width * 0.1f), 2.0f);
 
         // Obtener el ángulo del slider basado en su posición
@@ -65,7 +70,7 @@ public:
         starPath.applyTransform(rotation);
 
         // Dibujar la estrella base
-        g.setColour(Colour::fromRGB(6, 35, 111));
+        g.setColour(BLUE);
         g.fillPath(starPath);
 
         // Pintar la punta indicadora con un color diferente
@@ -84,7 +89,7 @@ public:
         indicatorPath.applyTransform(rotation);
 
         // Dibujar la punta indicadora
-        g.setColour(Colour::fromRGB(180, 62, 35));
+        g.setColour(ORANGE);
         g.fillPath(indicatorPath);
     }
 };
@@ -154,4 +159,120 @@ private:
 
     // Param itself to attach component
     juce::RangedAudioParameter* param;
+};
+
+class WaveformButton : public juce::Button
+{
+public:
+    WaveformButton(const juce::String& name, int wave_type)
+        : juce::Button(name)
+    {
+        setClickingTogglesState(true);
+        // Permite que el botón cambie de estado
+        type = wave_type;
+    }
+
+    void paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    {
+        using namespace juce;
+
+        auto bounds = getBtnBounds().toFloat();
+        
+        if (getToggleState()) {
+            g.setColour(BLUE);  // Color cuando está activado
+        }
+        else {
+            g.setColour(WHITE);  // Color cuando está desactivado
+        }
+        //g.setColour(shouldDrawButtonAsDown ? BLUE : WHITE);
+        g.fillRoundedRectangle(bounds, 6.f);
+        g.setColour(BLUE);
+        g.drawRoundedRectangle(bounds, 6.f, 2.0f);
+        //g.drawRect(bounds, 2.0f); // Contorno del botón
+
+        // Dibujar la onda senoidal
+        drawWave(g, bounds);
+    }
+
+private:
+
+    void drawWave(juce::Graphics& g, juce::Rectangle<float> area)
+    {
+        using namespace juce;
+
+
+        area.removeFromLeft(area.getWidth() * 0.2);
+        area.removeFromRight(area.getWidth() * 0.25);
+        Path wavePath;
+        float amplitude = area.getHeight() * 0.3f;  // Altura de la onda
+        float midY = area.getCentreY();
+        int numPoints = 100; // Suavidad de la onda
+
+        for (int i = 0; i < numPoints; ++i)
+        {
+            float x = jmap(float(i), 0.0f, float(numPoints - 1), area.getX(), area.getRight());
+            float y = 0;
+            float phase = jmap(float(i), 0.0f, float(numPoints - 1), 0.f, 4.f);
+            switch (type)
+            {
+            case 0:
+                y = midY + amplitude * std::sin(jmap(float(i), 0.0f, float(numPoints - 1), 0.0f, MathConstants<float>::twoPi));
+                break;
+            case 1:
+                // Mapeamos a [0,2]
+                y = midY + amplitude * (abs(fmod(phase - 1 + 4, 4) - 2) - 1);
+                break;
+            case 2:
+                y = midY + amplitude * ((phase < 2.f) ? -0.8f : 0.8f);
+                break;
+            case 3:
+                y = midY + amplitude * (fmod(phase + 2, 4) - 2) / 2;
+            }
+            
+
+            if (i == 0) {
+                if (type == 2) {
+                    wavePath.startNewSubPath(x, midY + amplitude * 0.8f);
+                    wavePath.lineTo(x, y);
+                }
+                else {
+                    wavePath.startNewSubPath(x, y);
+                }
+
+            }
+            else {
+                wavePath.lineTo(x, y);
+            }
+
+            if (i == numPoints - 1 && type == 2) {
+                wavePath.lineTo(x, midY -amplitude * 0.8f);
+            }
+                
+        }
+
+        g.setColour(getToggleState() ? WHITE : BLUE);
+        g.strokePath(wavePath, PathStrokeType(2.0f));
+    }
+
+    juce::Rectangle<int> getBtnBounds() const {
+
+        auto bounds = getLocalBounds();
+
+        // Get original bounds
+        auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
+
+        // Substract for text height
+        size -= 70.f;
+
+        // Create rectangle in order to be the bounds itself
+        juce::Rectangle<int> r;
+        r.setSize(size *1.8, size);
+        r.setCentre(bounds.getCentreX(), 0);
+        r.setY(bounds.getCentreY());
+
+        return r;
+    }
+
+    MyLookAndFeel lnf;
+    int type;
 };

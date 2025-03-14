@@ -44,8 +44,11 @@ private:
 
     juce::Label attackLabel, decayLabel, sustainLabel, releaseLabel;
 
+    WaveformButton sineButton, triangularButton, squareButton, sawButton;
+
     std::vector<juce::Component*> getComps();
     void paintOsc(juce::Rectangle<int>bounds);
     void setLabel(juce::Label& label, juce::String text, juce::Rectangle<int>bounds);
+    void selectWaveform(int newWaveType);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestSynthAudioProcessorEditor)
 };

@@ -198,6 +198,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TestSynthAudioProcessor::cre
     layout.add(std::make_unique<juce::AudioParameterFloat>("Decay", "Decay", 0.f, 2.f, 0.2f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Sustain", "Sustain", 0.f, 2.f, 0.8f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Release", "Release", 0.f, 2.f, 1.5f));
+    layout.add(std::make_unique<juce::AudioParameterInt>("WaveType", "WaveType", 0, 3, 0));
     return layout;
 }
 
