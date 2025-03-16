@@ -22,12 +22,18 @@ TestSynthAudioProcessor::TestSynthAudioProcessor()
                        )
 #endif
 {
-    mySynth.clearVoices();
-    for (int i = 0; i < 6; i++) {
-        mySynth.addVoice(new MyVoice());
+
+    for (int i = 0; i < numSynths; i++) {
+        osc.push_back(std::make_unique<JaleoOsc>());
+        synths.push_back(std::make_unique <juce::Synthesiser>());
+        synths.back()->clearVoices();
+        for (int i = 0; i < 6; i++) {
+            synths.back()->addVoice(new MyVoice());
+        }
+        synths.back()->clearSounds();
+        synths.back()->addSound(new MySound());
     }
-    mySynth.clearSounds();
-    mySynth.addSound(new MySound());
+
 }
 
 TestSynthAudioProcessor::~TestSynthAudioProcessor()
@@ -102,10 +108,13 @@ void TestSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 
-    mySynth.setCurrentPlaybackSampleRate(sampleRate);
+    
 
-    updateADSR();
-    updateWaveType();
+    for (int i = 0; i < numSynths; i++) {
+        synths[i]->setCurrentPlaybackSampleRate(sampleRate);
+        updateADSR(i);
+    }
+
 }
 
 void TestSynthAudioProcessor::releaseResources()
@@ -155,8 +164,13 @@ void TestSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    updateADSR();
-    updateWaveType();
+    for (int i = 0; i < numSynths; i++) {
+        updateADSR(i);
+        updateWaveType(i);
+        synths[i]->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    }
+
+
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing
@@ -164,7 +178,7 @@ void TestSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
-    mySynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+
 }
 
 //==============================================================================
@@ -196,38 +210,43 @@ void TestSynthAudioProcessor::setStateInformation (const void* data, int sizeInB
 
 juce::AudioProcessorValueTreeState::ParameterLayout TestSynthAudioProcessor::createParameterLayout() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Attack", "Attack", 0.f, 2.f, 0.1f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Decay", "Decay", 0.f, 2.f, 0.2f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Sustain", "Sustain", 0.f, 2.f, 0.8f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Release", "Release", 0.f, 2.f, 1.5f));
-    layout.add(std::make_unique<juce::AudioParameterInt>("WaveType", "WaveType", 0, 3, 0));
+    for (int i = 0; i < numSynths; i++) {
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Attack" + juce::String(i), "Attack" + juce::String(i), 0.f, 2.f, 0.1f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Decay" + juce::String(i), "Decay" + juce::String(i), 0.f, 2.f, 0.2f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Sustain" + juce::String(i), "Sustain" + juce::String(i), 0.f, 2.f, 0.8f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Release" + juce::String(i), "Release" + juce::String(i), 0.f, 2.f, 1.5f));
+        layout.add(std::make_unique<juce::AudioParameterInt>("WaveType" + juce::String(i), "WaveType" + juce::String(i), 0, 3, 0));
+    }
+
     return layout;
 }
 
-void TestSynthAudioProcessor::updateADSR()
+void TestSynthAudioProcessor::updateADSR(int oscIndex)
 {
-    
-    attack = *apvts.getRawParameterValue("Attack");
-    decay = *apvts.getRawParameterValue("Decay");
-    sustain = *apvts.getRawParameterValue("Sustain");
-    release = *apvts.getRawParameterValue("Release");
-    for (int i = 0; i < mySynth.getNumVoices(); i++)
+    osc[oscIndex]->attack = *apvts.getRawParameterValue("Attack" + juce::String(oscIndex));
+    osc[oscIndex]->decay = *apvts.getRawParameterValue("Decay" + juce::String(oscIndex));
+    osc[oscIndex]->sustain = *apvts.getRawParameterValue("Sustain" + juce::String(oscIndex));
+    osc[oscIndex]->release = *apvts.getRawParameterValue("Release" + juce::String(oscIndex));
+
+    for (int i = 0; i < synths[oscIndex]->getNumVoices(); i++)
     {
-        if (auto* voice = dynamic_cast<MyVoice*>(mySynth.getVoice(i)))
+
+        if (auto* voice = dynamic_cast<MyVoice*>(synths[oscIndex]->getVoice(i)))
         {
-            voice->setADSR(attack, decay, sustain, release);
+            voice->setADSR(osc[oscIndex]->attack, osc[oscIndex]->decay, osc[oscIndex]->sustain, osc[oscIndex]->release);
         }
     }
 }
 
-void TestSynthAudioProcessor::updateWaveType()
+void TestSynthAudioProcessor::updateWaveType(int oscIndex)
 {
-    waveType = *apvts.getRawParameterValue("WaveType");
-    for (int i = 0; i < mySynth.getNumVoices(); i++)
-    {
-        if (auto* voice = dynamic_cast<MyVoice*>(mySynth.getVoice(i)))
+    osc[oscIndex]->waveType = *apvts.getRawParameterValue("WaveType" + juce::String(oscIndex));
+    for (int i = 0; i < synths[oscIndex]->getNumVoices(); i++)
+    {    
+
+        if (auto* voice = dynamic_cast<MyVoice*>(synths[oscIndex]->getVoice(i)))
         {
-            voice->setWaveType(waveType);
+            voice->setWaveType(osc[oscIndex]->waveType);
         }
     }
 }

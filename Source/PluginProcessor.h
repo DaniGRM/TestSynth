@@ -14,6 +14,14 @@
 //==============================================================================
 /**
 */
+
+struct JaleoOsc {
+public:
+    float attack, decay, sustain, release;
+    int waveType;
+};
+
+
 class TestSynthAudioProcessor  : public juce::AudioProcessor
 {
 public:
@@ -59,15 +67,15 @@ public:
 
     // Parameters value tree
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
-    void updateADSR();
-    void updateWaveType();
+    void updateADSR(int oscIndex);
+    void updateWaveType(int oscIndex);
+
+    const static int numSynths = 2;
+
 private:
     //==============================================================================
-
-    juce::Synthesiser mySynth;
-    MyVoice* myVoice;
-
-
+    std::vector<std::unique_ptr< juce::Synthesiser>> synths;
+    std::vector<std::unique_ptr< JaleoOsc>> osc;
     float attack, decay, sustain, release;
     int waveType;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestSynthAudioProcessor)

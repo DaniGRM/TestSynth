@@ -14,6 +14,10 @@
 const juce::Colour BLUE = juce::Colour::fromRGB(6, 35, 111);
 const juce::Colour ORANGE = juce::Colour::fromRGB(180, 62, 35);
 const juce::Colour WHITE = juce::Colours::whitesmoke;
+
+
+const juce::Font titleFont = juce::Font("Parisienne", 50.0f, juce::Font::bold);
+const juce::Font andalusian = juce::Font("Parisienne", 25.0f, juce::Font::bold);
 class MyLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
@@ -259,7 +263,7 @@ private:
         auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
 
         // Substract for text height
-        size -= size * 0.7f * std::exp(-size * 0.001f);
+        size -= size * 0.7f * std::exp(-size * 0.005f);
 
         // Create rectangle in order to be the bounds itself
         juce::Rectangle<int> r;

@@ -8,6 +8,7 @@
               pluginCode="TS">
   <MAINGROUP id="g35M4c" name="TestSynth">
     <GROUP id="{FA7968B1-9DEA-0600-6C57-82FD1BB389F9}" name="Source">
+      <FILE id="uinrwz" name="JaleoOscComp.h" compile="0" resource="0" file="Source/JaleoOscComp.h"/>
       <FILE id="iQM472" name="GUI.h" compile="0" resource="0" file="Source/GUI.h"/>
       <FILE id="Cp4etn" name="MySound.h" compile="0" resource="0" file="Source/MySound.h"/>
       <FILE id="NCC8Ez" name="MyVoice.h" compile="0" resource="0" file="Source/MyVoice.h"/>

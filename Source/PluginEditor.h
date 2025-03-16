@@ -10,8 +10,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "TukyUI.h"
 #include "GUI.h"
+#include "JaleoOscComp.h"
 
 
 //==============================================================================
@@ -27,32 +27,16 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    const juce::Font titleFont = juce::Font("Parisienne", 50.0f, juce::Font::bold);
-    const juce::Font andalusian = juce::Font("Parisienne", 25.0f, juce::Font::bold);
 
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     TestSynthAudioProcessor& audioProcessor;
-
-    MyRotarySlider attackSlider, decaySlider, sustainSlider, releaseSlider;
-    //TukyUI::Components::TukyRotarySlider attackSlider;
+    std::vector<std::unique_ptr< JaleoOscComp>> oscillators;
 
 
-    // Usings to make code more readable
-    using APVTS = juce::AudioProcessorValueTreeState;
-    using Attachment = APVTS::SliderAttachment;
-
-    // Slider Attachment for sliders
-    Attachment attackSliderAttachment, decaySliderAttachment, sustainSliderAttachment, releaseSliderAttachment;
-
-    juce::Label attackLabel, decayLabel, sustainLabel, releaseLabel, title;
-
-    WaveformButton sineButton, triangularButton, squareButton, sawButton;
+    juce::Label title;
 
     std::vector<juce::Component*> getComps();
-    void paintOsc(juce::Rectangle<int>bounds);
-    void setLabel(juce::Label& label, juce::String text, juce::Rectangle<int>bounds);
-    void selectWaveform(int newWaveType);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestSynthAudioProcessorEditor)
 };
