@@ -120,14 +120,13 @@ struct MyRotarySlider : juce::Slider
         auto sliderBounds = getSliderBounds();
 
         double normalizedValue = (getValue() - range.getStart()) / (range.getEnd() - range.getStart());
-
         // Draw the slider
         getLookAndFeel().drawRotarySlider(g,
             sliderBounds.getX(),
             sliderBounds.getY(),
             sliderBounds.getWidth(),
             sliderBounds.getHeight(),
-            jmap(normalizedValue, range.getStart(), range.getEnd(), 0.0, 1.0),
+            jmap(normalizedValue, range.getStart(), range.getEnd(), 0.0, static_cast<double>(param->getNormalisableRange().end)),
             startAng,
             endAng,
             *this);
@@ -184,13 +183,12 @@ public:
         else {
             g.setColour(WHITE);  // Color cuando está desactivado
         }
-        //g.setColour(shouldDrawButtonAsDown ? BLUE : WHITE);
-        g.fillRoundedRectangle(bounds, 6.f);
+        auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
+        g.fillRoundedRectangle(bounds, std::sqrt(size));
         g.setColour(BLUE);
-        g.drawRoundedRectangle(bounds, 6.f, 2.0f);
-        //g.drawRect(bounds, 2.0f); // Contorno del botón
+        g.drawRoundedRectangle(bounds, std::sqrt(size), 2.0f);
 
-        // Dibujar la onda senoidal
+        // Draw wave
         drawWave(g, bounds);
     }
 
@@ -200,13 +198,12 @@ private:
     {
         using namespace juce;
 
-
         area.removeFromLeft(area.getWidth() * 0.2);
         area.removeFromRight(area.getWidth() * 0.25);
         Path wavePath;
-        float amplitude = area.getHeight() * 0.3f;  // Altura de la onda
+        float amplitude = area.getHeight() * 0.3f;
         float midY = area.getCentreY();
-        int numPoints = 100; // Suavidad de la onda
+        int numPoints = 100;
 
         for (int i = 0; i < numPoints; ++i)
         {
@@ -262,7 +259,7 @@ private:
         auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
 
         // Substract for text height
-        size -= 70.f;
+        size -= size * 0.7f * std::exp(-size * 0.001f);
 
         // Create rectangle in order to be the bounds itself
         juce::Rectangle<int> r;

@@ -66,8 +66,7 @@ public:
                 // iterate through all samples until end
                 while (--numSamples >= 0)
                 {
-                    // currentSample is: sin of currentAngle * level (volume) * tailOff (tail of decreasing sound)
-                    auto currentSample = (float)(std::sin(currentAngle) * level * tailOff * adsr.getNextSample());
+                    auto currentSample = (float)(getWaveValue() * level * tailOff * adsr.getNextSample());
 
                     // add it to all channels
                     for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
@@ -75,6 +74,8 @@ public:
 
                     // increase currentAngle and sample idx to write next iteration
                     currentAngle += angleDelta;
+                    if (currentAngle >= juce::MathConstants<float>::twoPi)
+                        currentAngle -= juce::MathConstants<float>::twoPi;
                     ++startSample;
 
                     tailOff *= 0.99; // exponential decay to simulate envelope
@@ -94,13 +95,17 @@ public:
                 while (--numSamples >= 0) // iterate until samples end
                 {
                     // currentSample is: sin of currentAngle * level (volume)
-                    auto currentSample = (float)(std::sin(currentAngle) * level * adsr.getNextSample());
 
+                    auto currentSample = (float)(getWaveValue() * level * adsr.getNextSample());
+                   
                     // add it to all channels
                     for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample(i, startSample, currentSample);
                     // increase currentAngle and sample idx to write next iteration
                     currentAngle += angleDelta;
+                    if (currentAngle >= juce::MathConstants<float>::twoPi)
+                        currentAngle -= juce::MathConstants<float>::twoPi;
+
                     ++startSample;
                 }
             }
@@ -125,6 +130,11 @@ public:
         adsrParams.release = newRelease;
         adsr.setParameters(adsrParams);
     }
+
+    void setWaveType(int newType)
+    {
+        waveType = newType;
+    }
 private:
     // currentAngle: phase
     // angleDelta: phase increase
@@ -134,4 +144,28 @@ private:
     double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
+    int waveType = 0;
+
+    float getWaveValue() {
+
+        float value = 0.f;
+        switch (waveType)
+        {
+        case 0:
+            value = (float)(std::sin(currentAngle));
+            break;
+        case 1:
+            value = (float)(2.0f / juce::MathConstants<float>::pi) * std::asin(std::sin(currentAngle));
+            break;
+        case 2:
+            value = (float)(std::sin(currentAngle) >= 0 ? 1.0f : -1.0f);
+            break;
+        case 3:
+            value = (float)(2.0f * (currentAngle / juce::MathConstants<float>::twoPi) - 1.0f);
+            break;
+        default:
+            break;
+        }
+        return value;
+    }
 };

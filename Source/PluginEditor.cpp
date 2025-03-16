@@ -53,9 +53,6 @@ void TestSynthAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (juce::Colours::whitesmoke);
-
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
 }
 
 void TestSynthAudioProcessorEditor::resized()
@@ -64,28 +61,15 @@ void TestSynthAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
+
+    auto header = bounds.removeFromTop(bounds.getHeight() * 0.15f);
+
+    title.setBounds(header);
+    title.setText("Jaleo", juce::dontSendNotification);
+    title.setJustificationType(juce::Justification::centredBottom);
+    title.setColour(juce::Label::textColourId, juce::Colour::fromRGB(6, 35, 111));
+    title.setFont(titleFont);
     paintOsc(bounds);
-
-
-    //attackLabel.setText("attack", juce::dontSendNotification);
-    //attackLabel.setBounds(0, 0, 30, 100);
-    //attackLabel.setJustificationType(juce::Justification::centredBottom);
-    //attackSlider.setBounds(30, 0, 100, 100);
-
-    //decayLabel.setText("decay", juce::dontSendNotification);
-    //decayLabel.setBounds(0, 100, 30, 100);
-    //decayLabel.setJustificationType(juce::Justification::centredBottom);
-    //decaySlider.setBounds(30, 100, 100, 100);
-
-    //sustainLabel.setText("decay", juce::dontSendNotification);
-    //sustainLabel.setBounds(0, 200, 30, 100);
-    //sustainLabel.setJustificationType(juce::Justification::centredBottom);
-    //sustainSlider.setBounds(30, 200, 100, 100);
-
-    //releaseLabel.setText("decay", juce::dontSendNotification);
-    //releaseLabel.setBounds(0, 300, 30, 100);
-    //releaseLabel.setJustificationType(juce::Justification::centredBottom);
-    //releaseSlider.setBounds(30, 300, 100, 100);
 }
 
 std::vector<juce::Component*> TestSynthAudioProcessorEditor::getComps()
@@ -103,7 +87,8 @@ std::vector<juce::Component*> TestSynthAudioProcessorEditor::getComps()
         &sineButton,
         &triangularButton,
         &squareButton,
-        &sawButton
+        &sawButton,
+        &title
     };
 }
 
@@ -112,7 +97,7 @@ void TestSynthAudioProcessorEditor::paintOsc(juce::Rectangle<int>bounds)
 
     juce::Array< MyRotarySlider*>osc_sliders = { &attackSlider, &decaySlider, &sustainSlider, &releaseSlider };
     juce::Array< juce::Label*>osc_labels = { &attackLabel, &decayLabel, &sustainLabel, &releaseLabel };
-    juce::Array< juce::String>osc_labels_text = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
+    juce::Array< juce::String>osc_labels_text = { "Attack", "Decay", "Sustain", "Release" };
     juce::Array< WaveformButton*>osc_buttons = { &sineButton, &triangularButton, &squareButton, &sawButton };
     for (int i = 0; i < 4; i++) {
         auto slider_bounds = bounds.removeFromLeft(bounds.getWidth() / (4 - i));
@@ -130,16 +115,19 @@ void TestSynthAudioProcessorEditor::setLabel(juce::Label& label, juce::String te
     label.setText(text, juce::dontSendNotification);
     label.setJustificationType(juce::Justification::centredTop);
     label.setColour(juce::Label::textColourId, juce::Colour::fromRGB(6, 35, 111));
-    label.setFont(TukyUI::Fonts::label);
-    //label.setColour(0, );
+    label.setFont(andalusian);
+    //label.setFont(TukyUI::Fonts::label);
 }
 
 void TestSynthAudioProcessorEditor::selectWaveform(int newWaveType)
 {
-    // Guardar el nuevo tipo de onda en el procesador
-    audioProcessor.apvts.getParameter("WaveType")->setValueNotifyingHost(newWaveType);
+    auto* waveParam = audioProcessor.apvts.getParameter("WaveType");
+    if (waveParam != nullptr)
+    {
+        float normalizedValue = waveParam->convertTo0to1(static_cast<float>(newWaveType));
+        waveParam->setValueNotifyingHost(normalizedValue);
+    }
 
-    // Cambiar el estado de los botones
     sineButton.setToggleState(newWaveType == 0, juce::dontSendNotification);
     triangularButton.setToggleState(newWaveType == 1, juce::dontSendNotification);
     squareButton.setToggleState(newWaveType == 2, juce::dontSendNotification);

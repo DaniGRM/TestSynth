@@ -60,6 +60,7 @@ public:
     // Parameters value tree
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
     void updateADSR();
+    void updateWaveType();
 private:
     //==============================================================================
 
@@ -68,6 +69,6 @@ private:
 
 
     float attack, decay, sustain, release;
-    int waveType = 0;
+    int waveType;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestSynthAudioProcessor)
 };

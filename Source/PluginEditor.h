@@ -26,6 +26,10 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+
+    const juce::Font titleFont = juce::Font("Parisienne", 50.0f, juce::Font::bold);
+    const juce::Font andalusian = juce::Font("Parisienne", 25.0f, juce::Font::bold);
+
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
@@ -42,7 +46,7 @@ private:
     // Slider Attachment for sliders
     Attachment attackSliderAttachment, decaySliderAttachment, sustainSliderAttachment, releaseSliderAttachment;
 
-    juce::Label attackLabel, decayLabel, sustainLabel, releaseLabel;
+    juce::Label attackLabel, decayLabel, sustainLabel, releaseLabel, title;
 
     WaveformButton sineButton, triangularButton, squareButton, sawButton;
 

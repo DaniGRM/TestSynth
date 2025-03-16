@@ -105,6 +105,7 @@ void TestSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     mySynth.setCurrentPlaybackSampleRate(sampleRate);
 
     updateADSR();
+    updateWaveType();
 }
 
 void TestSynthAudioProcessor::releaseResources()
@@ -155,6 +156,7 @@ void TestSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         buffer.clear (i, 0, buffer.getNumSamples());
 
     updateADSR();
+    updateWaveType();
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing
@@ -214,6 +216,18 @@ void TestSynthAudioProcessor::updateADSR()
         if (auto* voice = dynamic_cast<MyVoice*>(mySynth.getVoice(i)))
         {
             voice->setADSR(attack, decay, sustain, release);
+        }
+    }
+}
+
+void TestSynthAudioProcessor::updateWaveType()
+{
+    waveType = *apvts.getRawParameterValue("WaveType");
+    for (int i = 0; i < mySynth.getNumVoices(); i++)
+    {
+        if (auto* voice = dynamic_cast<MyVoice*>(mySynth.getVoice(i)))
+        {
+            voice->setWaveType(waveType);
         }
     }
 }
