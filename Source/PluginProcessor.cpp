@@ -25,13 +25,12 @@ TestSynthAudioProcessor::TestSynthAudioProcessor()
 
     for (int i = 0; i < numSynths; i++) {
         osc.push_back(std::make_unique<JaleoOsc>());
-        synths.push_back(std::make_unique <juce::Synthesiser>());
-        synths.back()->clearVoices();
+        osc.back()->synth.clearVoices();
         for (int i = 0; i < 6; i++) {
-            synths.back()->addVoice(new MyVoice());
+            osc.back()->synth.addVoice(new MyVoice());
         }
-        synths.back()->clearSounds();
-        synths.back()->addSound(new MySound());
+        osc.back()->synth.clearSounds();
+        osc.back()->synth.addSound(new MySound());
     }
 
 }
@@ -111,10 +110,9 @@ void TestSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     
 
     for (int i = 0; i < numSynths; i++) {
-        synths[i]->setCurrentPlaybackSampleRate(sampleRate);
-        updateADSR(i);
+        osc[i]->synth.setCurrentPlaybackSampleRate(sampleRate);
     }
-
+    updateOscs();
 }
 
 void TestSynthAudioProcessor::releaseResources()
@@ -155,30 +153,14 @@ void TestSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+
+    updateOscs();
     for (int i = 0; i < numSynths; i++) {
-        updateADSR(i);
-        updateWaveType(i);
-        synths[i]->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+        osc[i]->synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
-
-
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-
-
 }
 
 //==============================================================================
@@ -221,6 +203,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout TestSynthAudioProcessor::cre
     return layout;
 }
 
+void TestSynthAudioProcessor::updateOscs() {
+    for (int i = 0; i < numSynths; i++) {
+        updateADSR(i);
+        updateWaveType(i);
+    }
+}
 void TestSynthAudioProcessor::updateADSR(int oscIndex)
 {
     osc[oscIndex]->attack = *apvts.getRawParameterValue("Attack" + juce::String(oscIndex));
@@ -228,10 +216,10 @@ void TestSynthAudioProcessor::updateADSR(int oscIndex)
     osc[oscIndex]->sustain = *apvts.getRawParameterValue("Sustain" + juce::String(oscIndex));
     osc[oscIndex]->release = *apvts.getRawParameterValue("Release" + juce::String(oscIndex));
 
-    for (int i = 0; i < synths[oscIndex]->getNumVoices(); i++)
+    for (int i = 0; i < osc[oscIndex]->synth.getNumVoices(); i++)
     {
 
-        if (auto* voice = dynamic_cast<MyVoice*>(synths[oscIndex]->getVoice(i)))
+        if (auto* voice = dynamic_cast<MyVoice*>(osc[oscIndex]->synth.getVoice(i)))
         {
             voice->setADSR(osc[oscIndex]->attack, osc[oscIndex]->decay, osc[oscIndex]->sustain, osc[oscIndex]->release);
         }
@@ -241,10 +229,10 @@ void TestSynthAudioProcessor::updateADSR(int oscIndex)
 void TestSynthAudioProcessor::updateWaveType(int oscIndex)
 {
     osc[oscIndex]->waveType = *apvts.getRawParameterValue("WaveType" + juce::String(oscIndex));
-    for (int i = 0; i < synths[oscIndex]->getNumVoices(); i++)
+    for (int i = 0; i < osc[oscIndex]->synth.getNumVoices(); i++)
     {    
 
-        if (auto* voice = dynamic_cast<MyVoice*>(synths[oscIndex]->getVoice(i)))
+        if (auto* voice = dynamic_cast<MyVoice*>(osc[oscIndex]->synth.getVoice(i)))
         {
             voice->setWaveType(osc[oscIndex]->waveType);
         }

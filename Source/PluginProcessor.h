@@ -15,8 +15,10 @@
 /**
 */
 
-struct JaleoOsc {
+class JaleoOsc {
+
 public:
+    juce::Synthesiser synth;
     float attack, decay, sustain, release;
     int waveType;
 };
@@ -69,12 +71,12 @@ public:
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
     void updateADSR(int oscIndex);
     void updateWaveType(int oscIndex);
+    void updateOscs();
 
     const static int numSynths = 2;
 
 private:
     //==============================================================================
-    std::vector<std::unique_ptr< juce::Synthesiser>> synths;
     std::vector<std::unique_ptr< JaleoOsc>> osc;
     float attack, decay, sustain, release;
     int waveType;
