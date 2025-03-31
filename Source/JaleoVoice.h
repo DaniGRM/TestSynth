@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    MyVoice.h
+    JaleoVoice.h
     Created: 12 Feb 2025 6:53:52pm
     Author:  danii
 
@@ -10,19 +10,15 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "MySound.h"
+#include "JaleoSound.h"
 
-class MyVoice : public juce::SynthesiserVoice
+class JaleoVoice : public juce::SynthesiserVoice
 {
 public:
 
-    MyVoice(){
-
-    }
-
     bool canPlaySound(juce::SynthesiserSound* sound) override
     {
-        return dynamic_cast<MySound*>(sound) != nullptr;
+        return dynamic_cast<JaleoSound*>(sound) != nullptr;
     }
 
     void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int currentPitchWheelPosition) override
@@ -56,58 +52,36 @@ public:
 
     void renderNextBlock(juce::AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
     {
-
         // Operate only if angleDelta has been configured
         if (angleDelta != 0.0)
         {
+            bool applyingTailOff = (tailOff > 0.0);
 
-            if (tailOff > 0.0) // if tailOff is != 0.0 note has been stopped
+            while (--numSamples >= 0)
             {
-                // iterate through all samples until end
-                while (--numSamples >= 0)
+                auto currentSample = (float)(getWaveValue() * level * adsr.getNextSample());
+
+                if (applyingTailOff)
                 {
-                    auto currentSample = (float)(getWaveValue() * level * tailOff * adsr.getNextSample());
+                    currentSample *= tailOff;
+                    tailOff *= 0.99; // Exponential decay to simulate envelope
 
-                    // add it to all channels
-                    for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
-                        outputBuffer.addSample(i, startSample, currentSample);
-
-                    // increase currentAngle and sample idx to write next iteration
-                    currentAngle += angleDelta;
-                    if (currentAngle >= juce::MathConstants<float>::twoPi)
-                        currentAngle -= juce::MathConstants<float>::twoPi;
-                    ++startSample;
-
-                    tailOff *= 0.99; // exponential decay to simulate envelope
-
-                    // if tailOff is under a given threshold we asume note has end
-                    if (tailOff <= 0.005)
+                    if (tailOff <= 0.005) // If tailOff is under a threshold, assume note has ended
                     {
-                        clearCurrentNote(); // clear the voice -> available to be reused
-
-                        angleDelta = 0.0; // reset angleDelta for the next voice
+                        clearCurrentNote(); // Clear the voice -> available to be reused
+                        angleDelta = 0.0;   // Reset angleDelta for the next voice
                         break;
                     }
                 }
-            }
-            else // if tailOff is 0.0 note is hold
-            {
-                while (--numSamples >= 0) // iterate until samples end
-                {
-                    // currentSample is: sin of currentAngle * level (volume)
+                // Add it to all channels
+                for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
+                    outputBuffer.addSample(i, startSample, currentSample);
+                // Increase currentAngle and sample index to write next iteration
+                currentAngle += angleDelta;
+                if (currentAngle >= juce::MathConstants<float>::twoPi)
+                    currentAngle -= juce::MathConstants<float>::twoPi;
 
-                    auto currentSample = (float)(getWaveValue() * level * adsr.getNextSample());
-                   
-                    // add it to all channels
-                    for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
-                        outputBuffer.addSample(i, startSample, currentSample);
-                    // increase currentAngle and sample idx to write next iteration
-                    currentAngle += angleDelta;
-                    if (currentAngle >= juce::MathConstants<float>::twoPi)
-                        currentAngle -= juce::MathConstants<float>::twoPi;
-
-                    ++startSample;
-                }
+                ++startSample;
             }
         }
     }
@@ -166,6 +140,8 @@ private:
         default:
             break;
         }
+
+        //value *= LFO.getNextSample();
         return value;
     }
 };

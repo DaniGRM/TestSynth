@@ -8,10 +8,15 @@
               pluginCode="TS">
   <MAINGROUP id="g35M4c" name="TestSynth">
     <GROUP id="{FA7968B1-9DEA-0600-6C57-82FD1BB389F9}" name="Source">
-      <FILE id="uinrwz" name="JaleoOscComp.h" compile="0" resource="0" file="Source/JaleoOscComp.h"/>
-      <FILE id="iQM472" name="GUI.h" compile="0" resource="0" file="Source/GUI.h"/>
-      <FILE id="Cp4etn" name="MySound.h" compile="0" resource="0" file="Source/MySound.h"/>
-      <FILE id="NCC8Ez" name="MyVoice.h" compile="0" resource="0" file="Source/MyVoice.h"/>
+      <GROUP id="{EECD60BE-2226-D742-F617-D768DA4E3FFA}" name="Synth">
+        <FILE id="b2g0fJ" name="JaleoLFO.h" compile="0" resource="0" file="Source/JaleoLFO.h"/>
+        <FILE id="NCC8Ez" name="JaleoVoice.h" compile="0" resource="0" file="Source/JaleoVoice.h"/>
+        <FILE id="Cp4etn" name="JaleoSound.h" compile="0" resource="0" file="Source/JaleoSound.h"/>
+      </GROUP>
+      <GROUP id="{DC0CB3CA-2903-2BD4-58C8-D11EC94D4C28}" name="UI">
+        <FILE id="iQM472" name="GUI.h" compile="0" resource="0" file="Source/GUI.h"/>
+        <FILE id="uinrwz" name="JaleoOscComp.h" compile="0" resource="0" file="Source/JaleoOscComp.h"/>
+      </GROUP>
       <FILE id="M3Tdld" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="WuYANX" name="PluginProcessor.h" compile="0" resource="0"

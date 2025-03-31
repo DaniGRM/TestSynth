@@ -11,17 +11,21 @@
 #pragma once
 
 
+// COLORS
 const juce::Colour BLUE = juce::Colour::fromRGB(6, 35, 111);
-const juce::Colour ORANGE = juce::Colour::fromRGB(180, 62, 35);
+const juce::Colour ORANGE = juce::Colour::fromRGB(224, 130, 0);
 const juce::Colour WHITE = juce::Colours::whitesmoke;
 
-
+// FONTS
 const juce::Font titleFont = juce::Font("Parisienne", 50.0f, juce::Font::bold);
 const juce::Font andalusian = juce::Font("Parisienne", 25.0f, juce::Font::bold);
+
+// LOOKANDFEEL
+// With functions to draw components
 class MyLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-
+    // Function for rotary sliders
     void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height,
         float sliderPosProportional, float rotaryStartAngle,
         float rotaryEndAngle, juce::Slider& slider) override
@@ -32,19 +36,24 @@ public:
         auto center = bounds.getCentre();
         auto radius = jmin(width, height) * 0.4f;  // Radio del slider
 
-        // Dibujar fondo del slider
+        // Draw slider background
         g.setColour(WHITE);
         g.fillEllipse(bounds.reduced(width * 0.1f));
 
-        // Dibujar borde del slider
+        // Draw slider border
         g.setColour(BLUE);
         g.drawEllipse(bounds.reduced(width * 0.1f), 2.0f);
 
-        // Obtener el ángulo del slider basado en su posición
+        // Get slider angle in order to its position
         float sliderAngle = jmap(sliderPosProportional, 0.0f, 1.0f, rotaryStartAngle, rotaryEndAngle);
 
-        // Dibujar estrella de 8 puntas
+        // Draw 8 pointed star
+        draw8pointedStar(g, radius, center, sliderAngle);
+    }
 
+    // Function to draw 8 pointed star
+    void draw8pointedStar(juce::Graphics& g, int radius, juce::Point<float> center, float sliderAngle) {
+        using namespace juce;
         float innerRadius = radius * 0.61f;
         float outerRadius = radius * 0.8;
 
@@ -52,7 +61,7 @@ public:
         int numPoints = 8;
         float angleStep = MathConstants<float>::pi / numPoints;
 
-        // Índice de la punta fija que actuará como indicador
+        // Index for indicator point
         int indicatorIndex = 12;
 
         starPath.startNewSubPath(center.getX() + outerRadius * std::cos(0),
@@ -69,15 +78,15 @@ public:
         }
         starPath.closeSubPath();
 
-        // Aplicar rotación al path completo, incluyendo la punta indicadora
+        
         AffineTransform rotation = AffineTransform().rotated(sliderAngle, center.getX(), center.getY());
         starPath.applyTransform(rotation);
 
-        // Dibujar la estrella base
+        // Draw base star
         g.setColour(BLUE);
         g.fillPath(starPath);
 
-        // Pintar la punta indicadora con un color diferente
+        // Paint indicator
         float indicatorAngle = indicatorIndex * angleStep;
         Path indicatorPath;
         indicatorPath.startNewSubPath(center);
@@ -89,18 +98,19 @@ public:
             center.getY() + innerRadius * std::sin(indicatorAngle + angleStep));
         indicatorPath.closeSubPath();
 
-        // Aplicar la misma rotación a la punta indicadora
+        // Apply same rotation to indicator
         indicatorPath.applyTransform(rotation);
 
-        // Dibujar la punta indicadora
+        // Draw indicator
         g.setColour(ORANGE);
         g.fillPath(indicatorPath);
     }
 };
 
-struct MyRotarySlider : juce::Slider
+// 
+struct Star8Slider : juce::Slider
 {
-    MyRotarySlider(juce::RangedAudioParameter& rap) :
+    Star8Slider(juce::RangedAudioParameter& rap) :
         juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
             juce::Slider::TextEntryBoxPosition::NoTextBox),
         param(&rap)
@@ -108,7 +118,7 @@ struct MyRotarySlider : juce::Slider
         setLookAndFeel(&lnf);
     }
 
-    ~MyRotarySlider() {
+    ~Star8Slider() {
         setLookAndFeel(nullptr);
     }
     
@@ -143,9 +153,6 @@ struct MyRotarySlider : juce::Slider
         // Get original bounds
         auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
 
-        // Substract for text height
-        size -= 0.f;
-
         // Create rectangle in order to be the bounds itself
         juce::Rectangle<int> r;
         r.setSize(size, size);
@@ -171,7 +178,6 @@ public:
         : juce::Button(name)
     {
         setClickingTogglesState(true);
-        // Permite que el botón cambie de estado
         type = wave_type;
     }
 
@@ -182,10 +188,10 @@ public:
         auto bounds = getBtnBounds().toFloat();
         
         if (getToggleState()) {
-            g.setColour(BLUE);  // Color cuando está activado
+            g.setColour(BLUE);  // Active color
         }
         else {
-            g.setColour(WHITE);  // Color cuando está desactivado
+            g.setColour(WHITE);  // Inactive color
         }
         auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
         g.fillRoundedRectangle(bounds, std::sqrt(size));
@@ -220,7 +226,6 @@ private:
                 y = midY + amplitude * std::sin(jmap(float(i), 0.0f, float(numPoints - 1), 0.0f, MathConstants<float>::twoPi));
                 break;
             case 1:
-                // Mapeamos a [0,2]
                 y = midY + amplitude * (abs(fmod(phase - 1 + 4, 4) - 2) - 1);
                 break;
             case 2:
@@ -262,7 +267,7 @@ private:
         // Get original bounds
         auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
 
-        // Substract for text height
+        // Apply some padding
         size -= size * 0.7f * std::exp(-size * 0.005f);
 
         // Create rectangle in order to be the bounds itself

@@ -34,7 +34,6 @@ private:
     TestSynthAudioProcessor& audioProcessor;
     std::vector<std::unique_ptr< JaleoOscComp>> oscillators;
 
-
     juce::Label title;
 
     std::vector<juce::Component*> getComps();

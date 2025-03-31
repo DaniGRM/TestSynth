@@ -9,20 +9,11 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "MySound.h"
-#include "MyVoice.h"
+//#include "JaleoSound.h"
+#include "JaleoVoice.h"
 //==============================================================================
 /**
 */
-
-class JaleoOsc {
-
-public:
-    juce::Synthesiser synth;
-    float attack, decay, sustain, release;
-    int waveType;
-};
-
 
 class TestSynthAudioProcessor  : public juce::AudioProcessor
 {
@@ -69,16 +60,17 @@ public:
 
     // Parameters value tree
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
+
+    // Functions to update oscillators values from ui
     void updateADSR(int oscIndex);
     void updateWaveType(int oscIndex);
     void updateOscs();
 
-    const static int numSynths = 2;
+    // Num of oscillators 
+    const static int numOscs = 2;
 
 private:
     //==============================================================================
-    std::vector<std::unique_ptr< JaleoOsc>> osc;
-    float attack, decay, sustain, release;
-    int waveType;
+    std::vector<std::unique_ptr< juce::Synthesiser>> osc;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestSynthAudioProcessor)
 };

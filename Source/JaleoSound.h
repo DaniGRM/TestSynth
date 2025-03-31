@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    MySound.h
+    JaleoSound.h
     Created: 12 Feb 2025 7:12:53pm
     Author:  danii
 
@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-class MySound : public juce::SynthesiserSound
+class JaleoSound : public juce::SynthesiserSound
 {
     bool appliesToNote(int midiNoteNumber) override
     {

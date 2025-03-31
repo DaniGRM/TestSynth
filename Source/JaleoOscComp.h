@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    JaleoOsc.h
+    JaleoOscComp.h
     Created: 16 Mar 2025 5:31:53pm
     Author:  danii
 
@@ -50,7 +50,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        juce::Array< MyRotarySlider*>osc_sliders = { &attackSlider, &decaySlider, &sustainSlider, &releaseSlider };
+        juce::Array< Star8Slider*>osc_sliders = { &attackSlider, &decaySlider, &sustainSlider, &releaseSlider };
         juce::Array< juce::Label*>osc_labels = { &attackLabel, &decayLabel, &sustainLabel, &releaseLabel };
         juce::Array< juce::String>osc_labels_text = { "Attack", "Decay", "Sustain", "Release" };
         juce::Array< WaveformButton*>osc_buttons = { &sineButton, &triangularButton, &squareButton, &sawButton };
@@ -76,7 +76,7 @@ private:
     int index;
     TestSynthAudioProcessor& audioProcessor;
 
-    MyRotarySlider attackSlider, decaySlider, sustainSlider, releaseSlider;
+    Star8Slider attackSlider, decaySlider, sustainSlider, releaseSlider;
     using APVTS = juce::AudioProcessorValueTreeState;
     using Attachment = APVTS::SliderAttachment;
 

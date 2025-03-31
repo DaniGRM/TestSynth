@@ -23,14 +23,14 @@ TestSynthAudioProcessor::TestSynthAudioProcessor()
 #endif
 {
 
-    for (int i = 0; i < numSynths; i++) {
-        osc.push_back(std::make_unique<JaleoOsc>());
-        osc.back()->synth.clearVoices();
+    for (int i = 0; i < numOscs; i++) {
+        osc.push_back(std::make_unique<juce::Synthesiser>());
+        osc.back()->clearVoices();
         for (int i = 0; i < 6; i++) {
-            osc.back()->synth.addVoice(new MyVoice());
+            osc.back()->addVoice(new JaleoVoice());
         }
-        osc.back()->synth.clearSounds();
-        osc.back()->synth.addSound(new MySound());
+        osc.back()->clearSounds();
+        osc.back()->addSound(new JaleoSound());
     }
 
 }
@@ -109,8 +109,8 @@ void TestSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 
     
 
-    for (int i = 0; i < numSynths; i++) {
-        osc[i]->synth.setCurrentPlaybackSampleRate(sampleRate);
+    for (int i = 0; i < numOscs; i++) {
+        osc[i]->setCurrentPlaybackSampleRate(sampleRate);
     }
     updateOscs();
 }
@@ -158,8 +158,8 @@ void TestSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
 
 
     updateOscs();
-    for (int i = 0; i < numSynths; i++) {
-        osc[i]->synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    for (int i = 0; i < numOscs; i++) {
+        osc[i]->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
 }
 
@@ -192,11 +192,11 @@ void TestSynthAudioProcessor::setStateInformation (const void* data, int sizeInB
 
 juce::AudioProcessorValueTreeState::ParameterLayout TestSynthAudioProcessor::createParameterLayout() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    for (int i = 0; i < numSynths; i++) {
+    for (int i = 0; i < numOscs; i++) {
         layout.add(std::make_unique<juce::AudioParameterFloat>("Attack" + juce::String(i), "Attack" + juce::String(i), 0.f, 2.f, 0.1f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("Decay" + juce::String(i), "Decay" + juce::String(i), 0.f, 2.f, 0.2f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("Sustain" + juce::String(i), "Sustain" + juce::String(i), 0.f, 2.f, 0.8f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("Release" + juce::String(i), "Release" + juce::String(i), 0.f, 2.f, 1.5f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Release" + juce::String(i), "Release" + juce::String(i), 0.f, 5.f, 1.5f));
         layout.add(std::make_unique<juce::AudioParameterInt>("WaveType" + juce::String(i), "WaveType" + juce::String(i), 0, 3, 0));
     }
 
@@ -204,37 +204,32 @@ juce::AudioProcessorValueTreeState::ParameterLayout TestSynthAudioProcessor::cre
 }
 
 void TestSynthAudioProcessor::updateOscs() {
-    for (int i = 0; i < numSynths; i++) {
+    for (int i = 0; i < numOscs; i++) {
         updateADSR(i);
         updateWaveType(i);
     }
 }
 void TestSynthAudioProcessor::updateADSR(int oscIndex)
 {
-    osc[oscIndex]->attack = *apvts.getRawParameterValue("Attack" + juce::String(oscIndex));
-    osc[oscIndex]->decay = *apvts.getRawParameterValue("Decay" + juce::String(oscIndex));
-    osc[oscIndex]->sustain = *apvts.getRawParameterValue("Sustain" + juce::String(oscIndex));
-    osc[oscIndex]->release = *apvts.getRawParameterValue("Release" + juce::String(oscIndex));
-
-    for (int i = 0; i < osc[oscIndex]->synth.getNumVoices(); i++)
+    for (int i = 0; i < osc[oscIndex]->getNumVoices(); i++)
     {
-
-        if (auto* voice = dynamic_cast<MyVoice*>(osc[oscIndex]->synth.getVoice(i)))
+        if (auto* voice = dynamic_cast<JaleoVoice*>(osc[oscIndex]->getVoice(i)))
         {
-            voice->setADSR(osc[oscIndex]->attack, osc[oscIndex]->decay, osc[oscIndex]->sustain, osc[oscIndex]->release);
+            voice->setADSR(*apvts.getRawParameterValue("Attack" + juce::String(oscIndex)),
+                *apvts.getRawParameterValue("Decay" + juce::String(oscIndex)),
+                *apvts.getRawParameterValue("Sustain" + juce::String(oscIndex)),
+                *apvts.getRawParameterValue("Release" + juce::String(oscIndex)));
         }
     }
 }
 
 void TestSynthAudioProcessor::updateWaveType(int oscIndex)
 {
-    osc[oscIndex]->waveType = *apvts.getRawParameterValue("WaveType" + juce::String(oscIndex));
-    for (int i = 0; i < osc[oscIndex]->synth.getNumVoices(); i++)
+    for (int i = 0; i < osc[oscIndex]->getNumVoices(); i++)
     {    
-
-        if (auto* voice = dynamic_cast<MyVoice*>(osc[oscIndex]->synth.getVoice(i)))
+        if (auto* voice = dynamic_cast<JaleoVoice*>(osc[oscIndex]->getVoice(i)))
         {
-            voice->setWaveType(osc[oscIndex]->waveType);
+            voice->setWaveType(*apvts.getRawParameterValue("WaveType" + juce::String(oscIndex)));
         }
     }
 }
