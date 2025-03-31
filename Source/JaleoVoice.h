@@ -26,14 +26,14 @@ public:
         adsr.reset();
         adsr.setSampleRate(getSampleRate());
         adsr.noteOn();
-        currentAngle = 0.0;
+        phase = 0.0;
         level = velocity * 0.15;
         tailOff = 0.0;
 
         auto cyclesPerSecond = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
         auto cyclesPerSample = cyclesPerSecond / getSampleRate();
 
-        angleDelta = cyclesPerSample * 2.0 * juce::MathConstants<double>::pi;
+        phaseDelta = cyclesPerSample * 2.0 * juce::MathConstants<double>::pi;
     }
 
     void stopNote(float /*velocity*/, bool allowTailOff)
@@ -46,14 +46,14 @@ public:
         else
         {
             clearCurrentNote();
-            angleDelta = 0.0;
+            phaseDelta = 0.0;
         }
     }
 
     void renderNextBlock(juce::AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
     {
-        // Operate only if angleDelta has been configured
-        if (angleDelta != 0.0)
+        // Operate only if phaseDelta has been configured
+        if (phaseDelta != 0.0)
         {
             bool applyingTailOff = (tailOff > 0.0);
 
@@ -69,17 +69,17 @@ public:
                     if (tailOff <= 0.005) // If tailOff is under a threshold, assume note has ended
                     {
                         clearCurrentNote(); // Clear the voice -> available to be reused
-                        angleDelta = 0.0;   // Reset angleDelta for the next voice
+                        phaseDelta = 0.0;   // Reset phaseDelta for the next voice
                         break;
                     }
                 }
                 // Add it to all channels
                 for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                     outputBuffer.addSample(i, startSample, currentSample);
-                // Increase currentAngle and sample index to write next iteration
-                currentAngle += angleDelta;
-                if (currentAngle >= juce::MathConstants<float>::twoPi)
-                    currentAngle -= juce::MathConstants<float>::twoPi;
+                // Increase phase and sample index to write next iteration
+                phase += phaseDelta;
+                if (phase >= juce::MathConstants<float>::twoPi)
+                    phase -= juce::MathConstants<float>::twoPi;
 
                 ++startSample;
             }
@@ -110,12 +110,12 @@ public:
         waveType = newType;
     }
 private:
-    // currentAngle: phase
-    // angleDelta: phase increase
+    // phase: phase
+    // phaseDelta: phase increase
     // level: volume
     // tailOff
 
-    double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0;
+    double phase = 0.0, phaseDelta = 0.0, level = 0.0, tailOff = 0.0;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
     int waveType = 0;
@@ -126,22 +126,21 @@ private:
         switch (waveType)
         {
         case 0:
-            value = (float)(std::sin(currentAngle));
+            value = (float)(std::sin(phase));
             break;
         case 1:
-            value = (float)(2.0f / juce::MathConstants<float>::pi) * std::asin(std::sin(currentAngle));
+            value = (float)(2.0f / juce::MathConstants<float>::pi) * std::asin(std::sin(phase));
             break;
         case 2:
-            value = (float)(std::sin(currentAngle) >= 0 ? 1.0f : -1.0f);
+            value = (float)(std::sin(phase) >= 0 ? 1.0f : -1.0f);
             break;
         case 3:
-            value = (float)(2.0f * (currentAngle / juce::MathConstants<float>::twoPi) - 1.0f);
+            value = (float)(2.0f * (phase / juce::MathConstants<float>::twoPi) - 1.0f);
             break;
         default:
             break;
         }
 
-        //value *= LFO.getNextSample();
         return value;
     }
 };

@@ -49,7 +49,7 @@ void TestSynthAudioProcessorEditor::resized()
 
     if (!oscillators.empty()) {
 
-        for (int i = 0; i < audioProcessor.numOscs; ++i) // De momento 2 osciladores, pero puedes ampliarlo
+        for (int i = 0; i < audioProcessor.numOscs; ++i)
         {
             auto synthBounds = bounds.removeFromTop(bounds.getHeight() * ((float)(1) / (float)(audioProcessor.numOscs - i)));
             oscillators[i]->setBounds(synthBounds);

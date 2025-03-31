@@ -31,12 +31,13 @@ public:
         squareButton("squareBtn" + juce::String(oscIndex), 2),
         sawButton("sawBtn" + juce::String(oscIndex), 3)
     {
-        // Añadir botones de selección de forma de onda
+        // Wave form buttons
         sineButton.setToggleState(true, juce::dontSendNotification);
         triangularButton.setToggleState(false, juce::dontSendNotification);
         squareButton.setToggleState(false, juce::dontSendNotification);
         sawButton.setToggleState(false, juce::dontSendNotification);
 
+        // Wave form buttons action
         sineButton.onClick = [this] { selectWaveform(0); };
         triangularButton.onClick = [this] { selectWaveform(1); };
         squareButton.onClick = [this] { selectWaveform(2); };
@@ -76,6 +77,7 @@ private:
     int index;
     TestSynthAudioProcessor& audioProcessor;
 
+    // Components for a single oscillators
     Star8Slider attackSlider, decaySlider, sustainSlider, releaseSlider;
     using APVTS = juce::AudioProcessorValueTreeState;
     using Attachment = APVTS::SliderAttachment;
@@ -105,7 +107,7 @@ private:
     }
 
 
-
+    // Wave form selection
     void selectWaveform(int newWaveType)
     {
         auto* waveParam = audioProcessor.apvts.getParameter("WaveType" + juce::String(index));
