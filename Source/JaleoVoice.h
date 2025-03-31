@@ -31,20 +31,14 @@ public:
         tailOff = 0.0;
 
         auto cyclesPerSecond = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-        auto cyclesPerSample = cyclesPerSecond / getSampleRate();
-
-        phaseDelta = cyclesPerSample * 2.0 * juce::MathConstants<double>::pi;
+        phaseDelta = (cyclesPerSecond / getSampleRate()) * juce::MathConstants<double>::twoPi;
     }
 
     void stopNote(float /*velocity*/, bool allowTailOff)
     {
         adsr.noteOff();
-        if (allowTailOff) {
-            if (tailOff == 0.0)
-                tailOff = 1.0;
-        }
-        else
-        {
+
+        if (!allowTailOff) {
             clearCurrentNote();
             phaseDelta = 0.0;
         }

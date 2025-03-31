@@ -193,10 +193,10 @@ void TestSynthAudioProcessor::setStateInformation (const void* data, int sizeInB
 juce::AudioProcessorValueTreeState::ParameterLayout TestSynthAudioProcessor::createParameterLayout() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     for (int i = 0; i < numOscs; i++) {
-        layout.add(std::make_unique<juce::AudioParameterFloat>("Attack" + juce::String(i), "Attack" + juce::String(i), 0.f, 2.f, 0.1f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("Decay" + juce::String(i), "Decay" + juce::String(i), 0.f, 2.f, 0.2f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("Sustain" + juce::String(i), "Sustain" + juce::String(i), 0.f, 2.f, 0.8f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("Release" + juce::String(i), "Release" + juce::String(i), 0.f, 5.f, 1.5f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Attack" + juce::String(i), "Attack" + juce::String(i), 0.05f, 20.f, 0.1f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Decay" + juce::String(i), "Decay" + juce::String(i), 0.05f, 20.f, 0.2f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Sustain" + juce::String(i), "Sustain" + juce::String(i), 0.f, 1.f, 0.7f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Release" + juce::String(i), "Release" + juce::String(i), 0.05f, 40.f, 0.3f));
         layout.add(std::make_unique<juce::AudioParameterInt>("WaveType" + juce::String(i), "WaveType" + juce::String(i), 0, 3, 0));
     }
 
